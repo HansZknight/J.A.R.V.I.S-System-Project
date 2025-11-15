@@ -1,0 +1,2922 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARK INDUSTRIES - J.A.R.V.I.S Ultimate HUD System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d9ff;
+            --secondary: #ffd700;
+            --danger: #ff3b3b;
+            --success: #00ff00;
+            --warning: #ffd700;
+            --purple: #a78bfa;
+            --pink: #ff6b9d;
+            --bg-dark: rgba(0, 10, 20, 0.95);
+        }
+
+        body {
+            background: #000;
+            font-family: 'Rajdhani', 'Orbitron', sans-serif;
+            overflow: hidden;
+            cursor: none;
+            position: relative;
+        }
+
+        /* ========== CURSOR SYSTEM ========== */
+        .cursor {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            transition: all 0.1s ease;
+            box-shadow: 
+                0 0 20px var(--primary),
+                inset 0 0 20px rgba(0, 217, 255, 0.3);
+            mix-blend-mode: screen;
+        }
+
+        .cursor::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .cursor::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 1px solid var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: cursorPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes cursorPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99998;
+            opacity: 0.6;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* ========== BACKGROUND EFFECTS ========== */
+        .bg-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(0deg, transparent 24%, rgba(0, 217, 255, 0.05) 25%, rgba(0, 217, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 217, 255, 0.05) 75%, rgba(0, 217, 255, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 217, 255, 0.05) 25%, rgba(0, 217, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 217, 255, 0.05) 75%, rgba(0, 217, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 217, 255, 0.03) 50%);
+            background-size: 100% 4px;
+            animation: scan 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100%); }
+        }
+
+        /* ========== PARTICLE NETWORK ========== */
+        .particle-network {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle-node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: particleFloat 20s infinite ease-in-out;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(50px, 50px); }
+            50% { transform: translate(-30px, 80px); }
+            75% { transform: translate(70px, -40px); }
+        }
+
+        .particle-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.3;
+            transform-origin: left center;
+        }
+
+        /* ========== MATRIX RAIN ========== */
+        .matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .matrix-column {
+            position: absolute;
+            font-size: 12px;
+            color: var(--primary);
+            white-space: nowrap;
+            animation: matrixFall linear infinite;
+        }
+
+        @keyframes matrixFall {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        /* ========== DNA HELIX ========== */
+        .dna-helix {
+            position: fixed;
+            right: 330px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100px;
+            height: 400px;
+            z-index: 5;
+            opacity: 0.3;
+        }
+
+        .dna-strand {
+            position: absolute;
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: dnaRotate 4s ease-in-out infinite;
+        }
+
+        @keyframes dnaRotate {
+            0%, 100% { transform: translateX(0) rotateY(0deg); }
+            50% { transform: translateX(50px) rotateY(180deg); }
+        }
+
+        /* ========== SATELLITE ORBIT ========== */
+        .satellite-orbit {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            border: 2px dashed var(--primary);
+            border-radius: 50%;
+            opacity: 0.2;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .orbit-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px dashed rgba(0, 217, 255, 0.2);
+            border-radius: 50%;
+        }
+
+        .orbit-1 { width: 200px; height: 200px; }
+        .orbit-2 { width: 300px; height: 300px; }
+        .orbit-3 { width: 400px; height: 400px; }
+
+        .satellite {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: var(--warning);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--warning);
+            animation: satelliteOrbit 10s linear infinite;
+        }
+
+        @keyframes satelliteOrbit {
+            0% { transform: rotate(0deg) translateX(200px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(200px) rotate(-360deg); }
+        }
+
+        /* ========== ARC REACTOR ========== */
+        .arc-reactor-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            z-index: 10001;
+            perspective: 1000px;
+        }
+
+        .arc-reactor {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: reactorFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes reactorFloat {
+            0%, 100% { transform: rotateX(0deg) rotateY(0deg); }
+            25% { transform: rotateX(10deg) rotateY(10deg); }
+            50% { transform: rotateX(0deg) rotateY(20deg); }
+            75% { transform: rotateX(-10deg) rotateY(10deg); }
+        }
+
+        .reactor-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #fff, var(--primary));
+            border-radius: 50%;
+            box-shadow: 
+                0 0 30px var(--primary),
+                0 0 60px var(--primary),
+                0 0 90px var(--primary),
+                inset 0 0 30px #fff;
+            animation: corePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes corePulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 
+                    0 0 30px var(--primary),
+                    0 0 60px var(--primary),
+                    0 0 90px var(--primary),
+                    inset 0 0 30px #fff;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.15);
+                box-shadow: 
+                    0 0 40px var(--primary),
+                    0 0 80px var(--primary),
+                    0 0 120px var(--primary),
+                    inset 0 0 40px #fff;
+            }
+        }
+
+        .reactor-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .ring-1 { width: 60px; height: 60px; animation: rotateRing 4s linear infinite; }
+        .ring-2 { width: 80px; height: 80px; animation: rotateRing 6s linear infinite reverse; }
+        .ring-3 { width: 100px; height: 100px; animation: rotateRing 8s linear infinite; }
+        .ring-4 { width: 120px; height: 120px; animation: rotateRing 10s linear infinite reverse; border-style: dashed; }
+
+        @keyframes rotateRing {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .reactor-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: reactorParticle 3s ease-in-out infinite;
+        }
+
+        @keyframes reactorParticle {
+            0%, 100% { 
+                transform: translate(-50%, -50%) rotate(0deg) translateX(40px);
+                opacity: 0;
+            }
+            50% { opacity: 1; }
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 150px 30px 25px;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(0,0,0,0.8) 70%, transparent 100%);
+            z-index: 10000;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 5px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 32px;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+            letter-spacing: 6px;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            animation: logoGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            from { text-shadow: 0 0 20px var(--primary); }
+            to { text-shadow: 0 0 30px var(--primary), 0 0 40px var(--primary); }
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--secondary);
+            letter-spacing: 3px;
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            flex: 1;
+        }
+
+        .stat-card {
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 20px rgba(0, 217, 255, 0.3),
+                inset 0 0 20px rgba(0, 217, 255, 0.05);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 217, 255, 0.1), transparent);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-label {
+            color: var(--primary);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            color: var(--secondary);
+            font-size: 20px;
+            font-weight: 900;
+            text-shadow: 0 0 10px var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-progress {
+            width: 100%;
+            height: 5px;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .stat-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: progressShine 2s linear infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ========== SIDE PANELS ========== */
+        .side-panel-left {
+            position: fixed;
+            left: 20px;
+            top: 220px;
+            width: 280px;
+            bottom: 20px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: linear-gradient(180deg, rgba(0, 217, 255, 0.2) 0%, rgba(0, 217, 255, 0.05) 100%);
+            padding: 15px;
+            border-bottom: 1px solid var(--primary);
+            color: var(--primary);
+            font-size: 14px;
+            text-shadow: 0 0 5px var(--primary);
+            text-align: center;
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            color: var(--primary);
+            font-size: 11px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) #001a26;
+        }
+
+        .panel-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-body::-webkit-scrollbar-track {
+            background: #001a26;
+        }
+
+        .panel-body::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+            box-shadow: 0 0 5px var(--primary);
+        }
+
+        .monitor-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .monitor-label {
+            color: var(--primary);
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+
+        .monitor-graph {
+            width: 100%;
+            height: 30px;
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .monitor-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: wave 2s linear infinite;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+
+        /* ========== POWER DISTRIBUTION ========== */
+        .power-distribution {
+            position: fixed;
+            bottom: 250px;
+            right: 30px;
+            width: 300px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 5000;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .power-header {
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .power-item {
+            margin-bottom: 12px;
+        }
+
+        .power-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .power-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--primary);
+        }
+
+        .power-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--primary);
+            position: relative;
+        }
+
+        .power-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: powerShine 2s linear infinite;
+        }
+
+        @keyframes powerShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ========== TERMINAL GRID ========== */
+        .terminal-grid {
+            position: fixed;
+            top: 220px;
+            left: 320px;
+            right: 340px;
+            bottom: 100px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .terminal {
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 
+                0 0 20px rgba(0, 217, 255, 0.4),
+                inset 0 0 30px rgba(0, 217, 255, 0.05);
+            animation: terminalGlow 3s ease-in-out infinite alternate;
+            transition: all 0.3s;
+        }
+
+        .terminal:hover {
+            transform: scale(1.02);
+            box-shadow: 
+                0 0 40px rgba(0, 217, 255, 0.6),
+                inset 0 0 30px rgba(0, 217, 255, 0.1);
+        }
+
+        @keyframes terminalGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 217, 255, 0.4), inset 0 0 30px rgba(0, 217, 255, 0.05); }
+            100% { box-shadow: 0 0 30px rgba(0, 217, 255, 0.6), inset 0 0 30px rgba(0, 217, 255, 0.1); }
+        }
+
+        .terminal-header {
+            background: linear-gradient(180deg, rgba(0, 217, 255, 0.3), rgba(0, 217, 255, 0.1));
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-title {
+            color: var(--primary);
+            font-size: 11px;
+            text-shadow: 0 0 10px var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-icon {
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .terminal-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .terminal-btn:hover {
+            transform: scale(1.3);
+        }
+
+        .btn-close { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        .btn-minimize { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+        .btn-maximize { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+        .terminal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            font-size: 10px;
+            line-height: 1.6;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .code-line {
+            margin: 3px 0;
+            animation: codeFadeIn 0.3s ease-out;
+        }
+
+        @keyframes codeFadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(-15px);
+                filter: blur(3px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+                filter: blur(0);
+            }
+        }
+
+        .comment { color: #00ff88; font-style: italic; }
+        .function { color: var(--secondary); font-weight: bold; }
+        .string { color: #ff6b9d; }
+        .keyword { color: var(--primary); font-weight: bold; }
+        .error { color: var(--danger); font-weight: bold; }
+        .success { color: var(--success); }
+        .warning { color: var(--warning); }
+        .number { color: #a78bfa; }
+
+        /* ========== HEXAGONAL MENU ========== */
+        .hexagon-container {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 10000;
+        }
+
+        .hexagon {
+            width: 100px;
+            height: 110px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .hexagon:hover {
+            transform: scale(1.1);
+        }
+
+        .hexagon-shape {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            border: 2px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .hexagon-shape::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 217, 255, 0.2), transparent);
+            animation: hexRotate 4s linear infinite;
+        }
+
+        @keyframes hexRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hexagon-icon {
+            font-size: 32px;
+            z-index: 1;
+            filter: drop-shadow(0 0 10px var(--primary));
+        }
+
+        .hexagon-label {
+            font-size: 9px;
+            color: var(--primary);
+            text-align: center;
+            margin-top: 5px;
+            z-index: 1;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        /* ========== 3D HOLOGRAM ========== */
+        .hologram-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            perspective: 1000px;
+            z-index: 25000;
+            display: none;
+        }
+
+        .hologram-display.active {
+            display: block;
+            animation: holoFadeIn 0.5s ease-out;
+        }
+
+        @keyframes holoFadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .hologram-cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: holoCubeRotate 10s linear infinite;
+        }
+
+        @keyframes holoCubeRotate {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid var(--primary);
+            background: rgba(0, 217, 255, 0.1);
+            box-shadow: 
+                0 0 30px rgba(0, 217, 255, 0.5),
+                inset 0 0 30px rgba(0, 217, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+            left: 50%;
+            top: 50%;
+            margin-left: -100px;
+            margin-top: -100px;
+        }
+
+        .face-front  { transform: translateZ(100px); }
+        .face-back   { transform: translateZ(-100px) rotateY(180deg); }
+        .face-right  { transform: rotateY(90deg) translateZ(100px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(100px); }
+        .face-top    { transform: rotateX(90deg) translateZ(100px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+        /* ========== BIOMETRIC SCANNER ========== */
+        .biometric-scanner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 400px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            display: none;
+            z-index: 25000;
+            box-shadow: 0 0 50px rgba(0, 217, 255, 0.6);
+            overflow: hidden;
+        }
+
+        .biometric-scanner.active {
+            display: block;
+            animation: scannerSlide 0.5s ease-out;
+        }
+
+        @keyframes scannerSlide {
+            from { transform: translate(-50%, -150%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+
+        .scanner-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--primary);
+            background: linear-gradient(180deg, rgba(0, 217, 255, 0.2), transparent);
+            text-align: center;
+            color: var(--primary);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .fingerprint {
+            width: 150px;
+            height: 150px;
+            margin: 30px auto;
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        .fingerprint::before {
+            content: '👆';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--success), transparent);
+            animation: scanAnimation 2s ease-in-out infinite;
+            box-shadow: 0 0 20px var(--success);
+        }
+
+        @keyframes scanAnimation {
+            0%, 100% { top: 0; }
+            50% { top: 100%; }
+        }
+
+        .scan-result {
+            text-align: center;
+            padding: 20px;
+            color: var(--success);
+            font-size: 14px;
+        }
+
+        /* ========== FACE RECOGNITION ========== */
+        .face-recognition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 380px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 25000;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+            display: none;
+        }
+
+        .face-recognition.active {
+            display: block;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .face-header {
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .face-frame {
+            width: 100%;
+            height: 200px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            position: relative;
+            background: rgba(0, 217, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .face-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--success);
+        }
+
+        .corner-tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+        .corner-br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+        .face-scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--success), transparent);
+            animation: faceScan 2s ease-in-out infinite;
+            box-shadow: 0 0 20px var(--success);
+        }
+
+        @keyframes faceScan {
+            0%, 100% { top: 20%; }
+            50% { top: 80%; }
+        }
+
+        .face-data {
+            margin-top: 15px;
+            font-size: 11px;
+            color: var(--primary);
+        }
+
+        .face-data-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        /* ========== SPECTRUM ANALYZER ========== */
+        .spectrum-analyzer {
+            position: fixed;
+            bottom: 240px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 100px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 15px;
+            display: none;
+            z-index: 10000;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+        }
+
+        .spectrum-analyzer.active {
+            display: block;
+            animation: slideUpSpec 0.3s ease-out;
+        }
+
+        @keyframes slideUpSpec {
+            from { transform: translateX(-50%) translateY(200px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .spectrum-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 70px;
+            gap: 2px;
+        }
+
+        .spectrum-bar {
+            flex: 1;
+            background: linear-gradient(to top, var(--danger), var(--warning), var(--success));
+            border-radius: 3px 3px 0 0;
+            animation: spectrumWave 0.5s ease-in-out infinite alternate;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes spectrumWave {
+            0% { height: 10px; }
+            100% { height: 60px; }
+        }
+
+        /* ========== COMMAND BUILDER ========== */
+        .command-builder {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 25px;
+            display: none;
+            z-index: 25000;
+            box-shadow: 0 0 50px rgba(0, 217, 255, 0.6);
+        }
+
+        .command-builder.active {
+            display: block;
+            animation: zoomIn 0.3s ease-out;
+        }
+
+        @keyframes zoomIn {
+            from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .builder-header {
+            color: var(--primary);
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .command-input {
+            width: 100%;
+            background: rgba(0, 217, 255, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .command-input::placeholder {
+            color: rgba(0, 217, 255, 0.5);
+        }
+
+        .command-suggestions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-btn {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            padding: 10px;
+            color: var(--primary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(0, 217, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.4);
+        }
+
+        .builder-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .builder-btn {
+            flex: 1;
+            background: rgba(0, 217, 255, 0.2);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--primary);
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .builder-btn:hover {
+            background: rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+
+        /* ========== ACHIEVEMENT ========== */
+        .achievement {
+            position: fixed;
+            top: 100px;
+            right: -400px;
+            width: 350px;
+            background: linear-gradient(135deg, var(--bg-dark), rgba(0, 217, 255, 0.1));
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 25000;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+            transition: right 0.5s ease-out;
+        }
+
+        .achievement.show {
+            right: 30px;
+        }
+
+        .achievement-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .achievement-icon {
+            font-size: 40px;
+            animation: achievementBounce 0.5s ease-out;
+        }
+
+        @keyframes achievementBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(10deg); }
+        }
+
+        .achievement-title {
+            color: var(--secondary);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .achievement-desc {
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        /* ========== EASTER EGG ========== */
+        .easter-egg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            flex-direction: column;
+        }
+
+        .easter-egg.active {
+            display: flex;
+            animation: easterFadeIn 0.5s ease-out;
+        }
+
+        @keyframes easterFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .easter-title {
+            font-size: 48px;
+            color: var(--primary);
+            text-shadow: 0 0 30px var(--primary);
+            margin-bottom: 30px;
+            animation: easterGlow 2s ease-in-out infinite;
+            font-family: 'Orbitron', monospace;
+        }
+
+        @keyframes easterGlow {
+            0%, 100% { text-shadow: 0 0 30px var(--primary); }
+            50% { text-shadow: 0 0 60px var(--primary), 0 0 90px var(--primary); }
+        }
+
+        .easter-message {
+            font-size: 24px;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        .iron-man {
+            font-size: 100px;
+            animation: ironManFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes ironManFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(5deg); }
+        }
+
+        /* ========== NOTIFICATIONS ========== */
+        .notification-area {
+            position: fixed;
+            top: 220px;
+            right: 30px;
+            width: 350px;
+            max-height: calc(100vh - 500px);
+            overflow-y: auto;
+            z-index: 15000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: var(--bg-dark);
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 11px;
+            box-shadow: 0 0 20px;
+            animation: notificationSlide 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes notificationSlide {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: notificationShine 2s linear infinite;
+        }
+
+        @keyframes notificationShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .notification.info {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+        }
+
+        .notification.success {
+            border-color: var(--success);
+            color: var(--success);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+
+        .notification.warning {
+            border-color: var(--warning);
+            color: var(--warning);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .notification.error {
+            border-color: var(--danger);
+            color: var(--danger);
+            box-shadow: 0 0 20px rgba(255, 59, 59, 0.4);
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .notification-time {
+            font-size: 9px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* ========== CONTROL PANEL ========== */
+        .control-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background: linear-gradient(0deg, var(--bg-dark) 0%, rgba(0,0,0,0.8) 70%, transparent 100%);
+            border-top: 2px solid var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 0 30px;
+            z-index: 10000;
+            box-shadow: 0 -5px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .control-btn {
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 12px 24px;
+            color: var(--primary);
+            font-size: 11px;
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 0 0 10px var(--primary);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 217, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .control-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 217, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
+            transform: translateY(-5px);
+        }
+
+        .control-btn.active {
+            background: rgba(0, 217, 255, 0.3);
+            box-shadow: 
+                0 0 30px rgba(0, 217, 255, 0.8),
+                inset 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .control-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== VOICE VISUALIZER ========== */
+        .voice-visualizer {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 80px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 15px;
+            display: none;
+            z-index: 20000;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+        }
+
+        .voice-visualizer.active {
+            display: block;
+            animation: slideUpVoice 0.3s ease-out;
+        }
+
+        @keyframes slideUpVoice {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .voice-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 50px;
+            gap: 3px;
+        }
+
+        .voice-bar {
+            width: 8px;
+            background: linear-gradient(to top, var(--primary), var(--secondary));
+            border-radius: 4px;
+            animation: voiceWave 0.5s ease-in-out infinite alternate;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes voiceWave {
+            0% { height: 10px; }
+            100% { height: 45px; }
+        }
+
+        .voice-bar:nth-child(2) { animation-delay: 0.1s; }
+        .voice-bar:nth-child(3) { animation-delay: 0.2s; }
+        .voice-bar:nth-child(4) { animation-delay: 0.3s; }
+        .voice-bar:nth-child(5) { animation-delay: 0.4s; }
+        .voice-bar:nth-child(6) { animation-delay: 0.3s; }
+        .voice-bar:nth-child(7) { animation-delay: 0.2s; }
+        .voice-bar:nth-child(8) { animation-delay: 0.1s; }
+
+        /* ========== AI CHAT ========== */
+        .ai-chat {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 400px;
+            height: 500px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            display: none;
+            flex-direction: column;
+            z-index: 15000;
+            box-shadow: 0 0 40px rgba(0, 217, 255, 0.5);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .ai-chat.active {
+            display: flex;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(500px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .ai-chat-header {
+            padding: 15px;
+            background: linear-gradient(180deg, rgba(0, 217, 255, 0.2), rgba(0, 217, 255, 0.05));
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-chat-title {
+            color: var(--primary);
+            font-size: 14px;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .ai-chat-close {
+            width: 25px;
+            height: 25px;
+            border: 2px solid var(--danger);
+            border-radius: 50%;
+            background: rgba(255, 59, 59, 0.2);
+            color: var(--danger);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .ai-chat-close:hover {
+            background: rgba(255, 59, 59, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .ai-chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-message.user {
+            background: rgba(0, 217, 255, 0.2);
+            border: 1px solid var(--primary);
+            align-self: flex-end;
+            color: var(--primary);
+        }
+
+        .chat-message.ai {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid var(--secondary);
+            align-self: flex-start;
+            color: var(--secondary);
+        }
+
+        .ai-chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--primary);
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-chat-input input {
+            flex: 1;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: var(--primary);
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+        }
+
+        .ai-chat-input input::placeholder {
+            color: rgba(0, 217, 255, 0.5);
+        }
+
+        .ai-chat-input button {
+            background: rgba(0, 217, 255, 0.2);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: var(--primary);
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ai-chat-input button:hover {
+            background: rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+
+        /* ========== BOOT SEQUENCE ========== */
+        .boot-sequence {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: bootFadeOut 1s ease-in 4s forwards;
+        }
+
+        @keyframes bootFadeOut {
+            to { opacity: 0; pointer-events: none; }
+        }
+
+        .boot-logo {
+            font-size: 56px;
+            color: var(--primary);
+            text-shadow: 0 0 30px var(--primary);
+            margin-bottom: 40px;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            animation: bootLogoAnim 2s ease-in-out infinite;
+        }
+
+        @keyframes bootLogoAnim {
+            0%, 100% { 
+                opacity: 0.7; 
+                transform: scale(1);
+                filter: blur(0);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.08);
+                filter: blur(1px);
+            }
+        }
+
+        .boot-text {
+            color: var(--primary);
+            font-size: 13px;
+            margin: 8px 0;
+            animation: bootTextFade 0.5s ease-in;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes bootTextFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .boot-progress {
+            width: 500px;
+            height: 6px;
+            background: rgba(0, 217, 255, 0.2);
+            border-radius: 3px;
+            margin-top: 40px;
+            overflow: hidden;
+            border: 1px solid var(--primary);
+        }
+
+        .boot-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 20px var(--primary);
+            animation: bootProgressAnim 4s ease-in-out forwards;
+        }
+
+        @keyframes bootProgressAnim {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1600px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .terminal-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .power-distribution,
+            .dna-helix {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .side-panel-left {
+                display: none;
+            }
+            .terminal-grid {
+                left: 30px;
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .control-panel {
+                flex-wrap: wrap;
+                height: auto;
+                padding: 15px;
+            }
+            .ai-chat {
+                width: calc(100% - 60px);
+                right: 30px;
+            }
+            .hexagon-container {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio -->
+    <audio id="startupAudio" preload="auto">
+        <source src="asset/Voicy_Jarvis Start Up.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Boot Sequence -->
+    <div class="boot-sequence" id="bootSequence">
+        <div class="boot-logo">⚡ STARK INDUSTRIES ⚡</div>
+        <div class="boot-text">J.A.R.V.I.S OPERATING SYSTEM v3.0</div>
+        <div class="boot-text">INITIALIZING ARC REACTOR...</div>
+        <div class="boot-text">LOADING NEURAL NETWORKS...</div>
+        <div class="boot-text">ESTABLISHING QUANTUM ENCRYPTION...</div>
+        <div class="boot-text">CONNECTING TO SATELLITE NETWORK...</div>
+        <div class="boot-text">CALIBRATING WEAPONS SYSTEMS...</div>
+        <div class="boot-progress">
+            <div class="boot-progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+
+    <!-- Background -->
+    <div class="bg-wrapper">
+        <div class="grid-bg"></div>
+        <div class="scanline"></div>
+        <div class="matrix-rain" id="matrixRain"></div>
+    </div>
+
+    <!-- Particle Network -->
+    <div class="particle-network" id="particleNetwork"></div>
+
+    <!-- DNA Helix -->
+    <div class="dna-helix" id="dnaHelix"></div>
+
+    <!-- Satellite Orbits -->
+    <div class="satellite-orbit">
+        <div class="orbit-line orbit-1"></div>
+        <div class="orbit-line orbit-2"></div>
+        <div class="orbit-line orbit-3"></div>
+        <div class="satellite"></div>
+    </div>
+
+    <!-- Arc Reactor -->
+    <div class="arc-reactor-container">
+        <div class="arc-reactor">
+            <div class="reactor-ring ring-4"></div>
+            <div class="reactor-ring ring-3"></div>
+            <div class="reactor-ring ring-2"></div>
+            <div class="reactor-ring ring-1"></div>
+            <div class="reactor-core"></div>
+            <div class="reactor-particle" style="top: 20%; left: 50%;"></div>
+            <div class="reactor-particle" style="top: 50%; left: 80%;"></div>
+            <div class="reactor-particle" style="top: 80%; left: 50%;"></div>
+            <div class="reactor-particle" style="top: 50%; left: 20%;"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">J.A.R.V.I.S</div>
+                <div class="logo-subtitle">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">⚡ ARC REACTOR</div>
+                    <div class="stat-value"><span id="reactorPower">3.2</span> GJ/s</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-fill" id="reactorBar" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🖥️ CPU USAGE</div>
+                    <div class="stat-value"><span id="cpu">0</span>%</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-fill" id="cpuBar"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">💾 MEMORY</div>
+                    <div class="stat-value"><span id="ram">0</span>%</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-fill" id="ramBar"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🌐 NETWORK</div>
+                    <div class="stat-value"><span id="network">0</span> MB/s</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-fill" id="networkBar"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">⏱️ UPTIME</div>
+                    <div class="stat-value" id="uptime">00:00:00</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panel Left - System Monitor -->
+    <div class="side-panel-left">
+        <div class="panel-header">⚙️ SYSTEM MONITOR</div>
+        <div class="panel-body" id="systemMonitor">
+            <div class="monitor-item">
+                <div class="monitor-label">ARC REACTOR POWER</div>
+                <div class="monitor-graph">
+                    <div class="monitor-wave"></div>
+                </div>
+                <div style="margin-top: 5px; color: #00ff00;">3.2 GJ/s - OPTIMAL</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-label">NEURAL NETWORK ACTIVITY</div>
+                <div class="monitor-graph">
+                    <div class="monitor-wave" style="animation-duration: 1.5s;"></div>
+                </div>
+                <div style="margin-top: 5px; color: #ffd700;">PROCESSING 1.2M req/s</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-label">REPULSOR CHARGE</div>
+                <div class="monitor-graph">
+                    <div class="monitor-wave" style="animation-duration: 2.5s;"></div>
+                </div>
+                <div style="margin-top: 5px; color: #00ff00;">100% - READY</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-label">FLIGHT SYSTEMS</div>
+                <div class="monitor-graph">
+                    <div class="monitor-wave" style="animation-duration: 3s;"></div>
+                </div>
+                <div style="margin-top: 5px; color: #00ff00;">CALIBRATED</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-label">SATELLITE LINK</div>
+                <div class="monitor-graph">
+                    <div class="monitor-wave" style="animation-duration: 2s;"></div>
+                </div>
+                <div style="margin-top: 5px; color: #00ff00;">CONNECTED - 47 SATS</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Power Distribution -->
+    <div class="power-distribution">
+        <div class="power-header">⚡ POWER DISTRIBUTION</div>
+        <div class="power-item">
+            <div class="power-label">
+                <span>REPULSORS</span>
+                <span id="powerRepulsor">85%</span>
+            </div>
+            <div class="power-bar">
+                <div class="power-fill" id="barRepulsor" style="width: 85%"></div>
+            </div>
+        </div>
+        <div class="power-item">
+            <div class="power-label">
+                <span>SHIELDS</span>
+                <span id="powerShield">92%</span>
+            </div>
+            <div class="power-bar">
+                <div class="power-fill" id="barShield" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="power-item">
+            <div class="power-label">
+                <span>FLIGHT</span>
+                <span id="powerFlight">78%</span>
+            </div>
+            <div class="power-bar">
+                <div class="power-fill" id="barFlight" style="width: 78%"></div>
+            </div>
+        </div>
+        <div class="power-item">
+            <div class="power-label">
+                <span>WEAPONS</span>
+                <span id="powerWeapon">95%</span>
+            </div>
+            <div class="power-bar">
+                <div class="power-fill" id="barWeapon" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="power-item">
+            <div class="power-label">
+                <span>AI CORE</span>
+                <span id="powerAI">100%</span>
+            </div>
+            <div class="power-bar">
+                <div class="power-fill" id="barAI" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="notification-area" id="notificationArea"></div>
+
+    <!-- Terminal Grid -->
+    <div class="terminal-grid">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-title">
+                    <div class="terminal-icon">⚙️</div>
+                    AI CORE - /stark/ai/main.py
+                </div>
+                <div class="terminal-buttons">
+                    <div class="terminal-btn btn-close"></div>
+                    <div class="terminal-btn btn-minimize"></div>
+                    <div class="terminal-btn btn-maximize"></div>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal1"></div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-title">
+                    <div class="terminal-icon">🧠</div>
+                    NEURAL NET - /stark/neural/network.js
+                </div>
+                <div class="terminal-buttons">
+                    <div class="terminal-btn btn-close"></div>
+                    <div class="terminal-btn btn-minimize"></div>
+                    <div class="terminal-btn btn-maximize"></div>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal2"></div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-title">
+                    <div class="terminal-icon">🛡️</div>
+                    SECURITY - /stark/security/firewall.cpp
+                </div>
+                <div class="terminal-buttons">
+                    <div class="terminal-btn btn-close"></div>
+                    <div class="terminal-btn btn-minimize"></div>
+                    <div class="terminal-btn btn-maximize"></div>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal3"></div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-title">
+                    <div class="terminal-icon">📊</div>
+                    DIAGNOSTICS - /var/log/diagnostics.log
+                </div>
+                <div class="terminal-buttons">
+                    <div class="terminal-btn btn-close"></div>
+                    <div class="terminal-btn btn-minimize"></div>
+                    <div class="terminal-btn btn-maximize"></div>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal4"></div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-title">
+                    <div class="terminal-icon">⚔️</div>
+                    WEAPONS - /stark/weapons/systems.rs
+                </div>
+                <div class="terminal-buttons">
+                    <div class="terminal-btn btn-close"></div>
+                    <div class="terminal-btn btn-minimize"></div>
+                    <div class="terminal-btn btn-maximize"></div>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal5"></div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-title">
+                    <div class="terminal-icon">🚀</div>
+                    FLIGHT - /stark/flight/control.go
+                </div>
+                <div class="terminal-buttons">
+                    <div class="terminal-btn btn-close"></div>
+                    <div class="terminal-btn btn-minimize"></div>
+                    <div class="terminal-btn btn-maximize"></div>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal6"></div>
+        </div>
+    </div>
+
+    <!-- Hexagonal Menu -->
+    <div class="hexagon-container">
+        <div class="hexagon" onclick="toggleHologram()">
+            <div class="hexagon-shape">
+                <div class="hexagon-icon">🎲</div>
+                <div class="hexagon-label">3D VIEW</div>
+            </div>
+        </div>
+        <div class="hexagon" onclick="toggleBiometric()">
+            <div class="hexagon-shape">
+                <div class="hexagon-icon">🔐</div>
+                <div class="hexagon-label">BIOMETRIC</div>
+            </div>
+        </div>
+        <div class="hexagon" onclick="toggleSpectrum()">
+            <div class="hexagon-shape">
+                <div class="hexagon-icon">🎵</div>
+                <div class="hexagon-label">SPECTRUM</div>
+            </div>
+        </div>
+        <div class="hexagon" onclick="toggleFaceRec()">
+            <div class="hexagon-shape">
+                <div class="hexagon-icon">👤</div>
+                <div class="hexagon-label">FACE SCAN</div>
+            </div>
+        </div>
+        <div class="hexagon" onclick="toggleCommandBuilder()">
+            <div class="hexagon-shape">
+                <div class="hexagon-icon">⚡</div>
+                <div class="hexagon-label">COMMANDS</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Hologram Display -->
+    <div class="hologram-display" id="hologramDisplay">
+        <div class="hologram-cube">
+            <div class="cube-face face-front">STARK</div>
+            <div class="cube-face face-back">TECH</div>
+            <div class="cube-face face-right">IRON</div>
+            <div class="cube-face face-left">MAN</div>
+            <div class="cube-face face-top">⚡</div>
+            <div class="cube-face face-bottom">🦾</div>
+        </div>
+    </div>
+
+    <!-- Biometric Scanner -->
+    <div class="biometric-scanner" id="biometricScanner">
+        <div class="scanner-header">🔐 BIOMETRIC AUTHENTICATION</div>
+        <div class="fingerprint">
+            <div class="scan-line"></div>
+        </div>
+        <div class="scan-result">
+            <div style="color: var(--success); font-weight: bold; font-size: 16px;">✓ IDENTITY CONFIRMED</div>
+            <div style="margin-top: 10px;">ANTHONY EDWARD STARK</div>
+            <div style="font-size: 10px; opacity: 0.7; margin-top: 5px;">ACCESS LEVEL: MAXIMUM</div>
+        </div>
+    </div>
+
+    <!-- Face Recognition -->
+    <div class="face-recognition" id="faceRecognition">
+        <div class="face-header">👤 FACIAL RECOGNITION</div>
+        <div class="face-frame">
+            <div class="face-corner corner-tl"></div>
+            <div class="face-corner corner-tr"></div>
+            <div class="face-corner corner-bl"></div>
+            <div class="face-corner corner-br"></div>
+            <div class="face-scan-line"></div>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px;">😎</div>
+        </div>
+        <div class="face-data">
+            <div class="face-data-item">
+                <span>NAME:</span>
+                <span>TONY STARK</span>
+            </div>
+            <div class="face-data-item">
+                <span>MATCH:</span>
+                <span style="color: var(--success);">99.7%</span>
+            </div>
+            <div class="face-data-item">
+                <span>STATUS:</span>
+                <span style="color: var(--success);">AUTHORIZED</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spectrum Analyzer -->
+    <div class="spectrum-analyzer" id="spectrumAnalyzer">
+        <div class="spectrum-bars" id="spectrumBars"></div>
+    </div>
+
+    <!-- Command Builder -->
+    <div class="command-builder" id="commandBuilder">
+        <div class="builder-header">⚡ CUSTOM COMMAND BUILDER</div>
+        <input type="text" class="command-input" id="commandInput" placeholder="Enter custom command...">
+        <div class="command-suggestions">
+            <button class="suggestion-btn" onclick="addCommand('ACTIVATE THRUSTERS')">ACTIVATE THRUSTERS</button>
+            <button class="suggestion-btn" onclick="addCommand('CHARGE REPULSORS')">CHARGE REPULSORS</button>
+            <button class="suggestion-btn" onclick="addCommand('SCAN PERIMETER')">SCAN PERIMETER</button>
+            <button class="suggestion-btn" onclick="addCommand('DEPLOY NANOBOTS')">DEPLOY NANOBOTS</button>
+            <button class="suggestion-btn" onclick="addCommand('INITIATE PROTOCOL')">INITIATE PROTOCOL</button>
+            <button class="suggestion-btn" onclick="addCommand('RUN DIAGNOSTICS')">RUN DIAGNOSTICS</button>
+        </div>
+        <div class="builder-actions">
+            <button class="builder-btn" onclick="executeCommand()">EXECUTE</button>
+            <button class="builder-btn" onclick="toggleCommandBuilder()">CANCEL</button>
+        </div>
+    </div>
+
+    <!-- Achievement Popup -->
+    <div class="achievement" id="achievement">
+        <div class="achievement-header">
+            <div class="achievement-icon">🏆</div>
+            <div>
+                <div class="achievement-title">ACHIEVEMENT UNLOCKED!</div>
+                <div class="achievement-desc" id="achievementDesc">System Master</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Visualizer -->
+    <div class="voice-visualizer" id="voiceVisualizer">
+        <div class="voice-bars">
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+            <div class="voice-bar"></div>
+        </div>
+    </div>
+
+    <!-- AI Chat Interface -->
+    <div class="ai-chat" id="aiChat">
+        <div class="ai-chat-header">
+            <div class="ai-chat-title">💬 JARVIS AI ASSISTANT</div>
+            <div class="ai-chat-close" onclick="toggleChat()">×</div>
+        </div>
+        <div class="ai-chat-body" id="chatBody">
+            <div class="chat-message ai">Good morning, sir. How may I assist you today?</div>
+        </div>
+        <div class="ai-chat-input">
+            <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleChatEnter(event)">
+            <button onclick="sendMessage()">SEND</button>
+        </div>
+    </div>
+
+    <!-- Easter Egg -->
+    <div class="easter-egg" id="easterEgg">
+        <div class="easter-title">JARVIS PROTOCOL ACTIVATED</div>
+        <div class="iron-man">🦾</div>
+        <div class="easter-message">"I Am Iron Man"</div>
+        <div style="color: var(--primary); margin-top: 20px; cursor: pointer;" onclick="closeEasterEgg()">
+            Click to close
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <div class="control-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Fullscreen (F)">
+            <span>🖥️ FULLSCREEN</span>
+        </div>
+        <div class="control-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice Mode (V)">
+            <span>🎤 VOICE</span>
+        </div>
+        <div class="control-btn" id="chatBtn" onclick="toggleChat()" title="AI Chat (A)">
+            <span>💬 JARVIS</span>
+        </div>
+        <div class="control-btn" id="clearBtn" onclick="clearTerminals()" title="Clear (C)">
+            <span>🗑️ CLEAR</span>
+        </div>
+        <div class="control-btn" id="pauseBtn" onclick="togglePause()" title="Pause (Space)">
+            <span>⏸️ PAUSE</span>
+        </div>
+        <div class="control-btn" id="speedBtn" onclick="toggleSpeed()" title="Speed (S)">
+            <span>⚡ SPEED: 1x</span>
+        </div>
+        <div class="control-btn" id="themeBtn" onclick="toggleTheme()" title="Theme (T)">
+            <span>🎨 THEME</span>
+        </div>
+        <div class="control-btn" id="scanBtn" onclick="runScan()" title="System Scan (R)">
+            <span>🔍 SCAN</span>
+        </div>
+         <li><a href="index.html">Home</a></li>
+    </div>
+
+    <script>
+        // ========== CURSOR SYSTEM ==========
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 15 + 'px';
+            cursor.style.top = e.clientY - 15 + 'px';
+
+            // Cursor trail
+            if (Math.random() > 0.7) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.left = e.clientX + 'px';
+                trail.style.top = e.clientY + 'px';
+                document.body.appendChild(trail);
+                setTimeout(() => {
+                    trail.style.opacity = '0';
+                    trail.style.transform = 'scale(0)';
+                }, 10);
+                setTimeout(() => trail.remove(), 500);
+            }
+        });
+
+        // ========== MATRIX RAIN ==========
+        function createMatrixRain() {
+            const matrixContainer = document.getElementById('matrixRain');
+            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            
+            for (let i = 0; i < 20; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.animationDuration = (Math.random() * 5 + 3) + 's';
+                column.style.animationDelay = Math.random() * 3 + 's';
+                
+                let text = '';
+                for (let j = 0; j < 20; j++) {
+                    text += chars[Math.floor(Math.random() * chars.length)] + ' ';
+                }
+                column.textContent = text;
+                matrixContainer.appendChild(column);
+            }
+        }
+        createMatrixRain();
+
+        // ========== DNA HELIX ==========
+        function createDNAHelix() {
+            const dnaContainer = document.getElementById('dnaHelix');
+            for (let i = 0; i < 20; i++) {
+                const strand = document.createElement('div');
+                strand.className = 'dna-strand';
+                strand.style.top = (i * 20) + 'px';
+                strand.style.animationDelay = (i * 0.1) + 's';
+                dnaContainer.appendChild(strand);
+            }
+        }
+        createDNAHelix();
+
+        // ========== PARTICLE NETWORK ==========
+        function createParticleNetwork() {
+            const container = document.getElementById('particleNetwork');
+            const particles = [];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle-node';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(particle);
+                particles.push(particle);
+            }
+
+            setInterval(() => {
+                document.querySelectorAll('.particle-line').forEach(line => line.remove());
+                
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const rect1 = particles[i].getBoundingClientRect();
+                        const rect2 = particles[j].getBoundingClientRect();
+                        
+                        const distance = Math.hypot(
+                            rect2.left - rect1.left,
+                            rect2.top - rect1.top
+                        );
+                        
+                        if (distance < 200) {
+                            const line = document.createElement('div');
+                            line.className = 'particle-line';
+                            const angle = Math.atan2(rect2.top - rect1.top, rect2.left - rect1.left);
+                            line.style.width = distance + 'px';
+                            line.style.left = rect1.left + 'px';
+                            line.style.top = rect1.top + 'px';
+                            line.style.transform = `rotate(${angle}rad)`;
+                            container.appendChild(line);
+                        }
+                    }
+                }
+            }, 2000);
+        }
+        createParticleNetwork();
+
+        // ========== SPECTRUM ANALYZER ==========
+        function createSpectrum() {
+            const container = document.getElementById('spectrumBars');
+            for (let i = 0; i < 40; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'spectrum-bar';
+                bar.style.animationDelay = (i * 0.05) + 's';
+                bar.style.animationDuration = (Math.random() * 0.5 + 0.3) + 's';
+                container.appendChild(bar);
+            }
+        }
+        createSpectrum();
+
+        // ========== CODE TEMPLATES ==========
+        const codeTemplates = {
+            terminal1: [
+                '<span class="comment"># STARK AI CORE - Advanced Neural Processing v3.0</span>',
+                '<span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf',
+                '<span class="keyword">import</span> quantum_ai <span class="keyword">as</span> qai',
+                '<span class="keyword">from</span> stark.core <span class="keyword">import</span> ArcReactor, JARVIS',
+                '',
+                '<span class="keyword">class</span> <span class="function">AdvancedAI</span>():',
+                '    <span class="keyword">def</span> <span class="function">__init__</span>(self):',
+                '        self.reactor = <span class="function">ArcReactor</span>(output=<span class="number">3.2</span>)',
+                '        self.neural_net = <span class="function">tf.keras.Sequential</span>([',
+                '            tf.keras.layers.<span class="function">Dense</span>(<span class="number">2048</span>, activation=<span class="string">\'relu\'</span>),',
+                '            tf.keras.layers.<span class="function">Dense</span>(<span class="number">1024</span>, activation=<span class="string">\'relu\'</span>),',
+                '            tf.keras.layers.<span class="function">Dense</span>(<span class="number">512</span>, activation=<span class="string">\'softmax\'</span>)',
+                '        ])',
+                '        <span class="success">print("✓ Neural network initialized")</span>',
+                '',
+                '    <span class="keyword">def</span> <span class="function">process_voice_command</span>(self, audio):',
+                '        features = self.<span class="function">extract_mfcc</span>(audio)',
+                '        prediction = self.neural_net.<span class="function">predict</span>(features)',
+                '        command = self.<span class="function">decode_command</span>(prediction)',
+                '        <span class="success">return</span> command',
+                '',
+                '<span class="comment"># Initialize JARVIS</span>',
+                'jarvis = <span class="function">AdvancedAI</span>()',
+                '<span class="success">✓ JARVIS AI Core: ONLINE</span>',
+                '<span class="success">✓ Quantum processors: ACTIVE</span>',
+                '<span class="success">✓ Voice recognition: 99.7% accuracy</span>',
+            ],
+            terminal2: [
+                '<span class="comment">// NEURAL NETWORK - Deep Learning Engine</span>',
+                '<span class="keyword">const</span> brain = <span class="function">require</span>(<span class="string">\'brain.js\'</span>);',
+                '<span class="keyword">const</span> { NeuralNetwork, GPU } = brain;',
+                '',
+                '<span class="keyword">class</span> <span class="function">StarkNeuralNet</span> {',
+                '  <span class="function">constructor</span>() {',
+                '    this.network = <span class="keyword">new</span> <span class="function">NeuralNetwork</span>({',
+                '      hiddenLayers: [<span class="number">2048, 1024, 512, 256</span>],',
+                '      activation: <span class="string">\'leaky-relu\'</span>,',
+                '      learningRate: <span class="number">0.001</span>,',
+                '      gpu: <span class="keyword">true</span>',
+                '    });',
+                '  }',
+                '',
+                '  <span class="keyword">async</span> <span class="function">train</span>(dataset) {',
+                '    <span class="success">console.log(\'🧠 Training neural network...\');</span>',
+                '    <span class="keyword">await</span> this.network.<span class="function">trainAsync</span>(dataset, {',
+                '      iterations: <span class="number">10000</span>,',
+                '      errorThresh: <span class="number">0.005</span>',
+                '    });',
+                '    <span class="success">console.log(\'✓ Training complete\');</span>',
+                '  }',
+                '}',
+                '',
+                '<span class="keyword">const</span> ai = <span class="keyword">new</span> <span class="function">StarkNeuralNet</span>();',
+                '<span class="success">✓ Neural network ready</span>',
+            ],
+            terminal3: [
+                '<span class="comment">// SECURITY FIREWALL - Quantum Encryption v3.0</span>',
+                '<span class="keyword">#include</span> <span class="string">&lt;quantum/encryption.h&gt;</span>',
+                '<span class="keyword">#include</span> <span class="string">&lt;stark/security.h&gt;</span>',
+                '',
+                '<span class="keyword">namespace</span> stark::security {',
+                '',
+                '<span class="keyword">class</span> <span class="function">QuantumFirewall</span> {',
+                '<span class="keyword">private</span>:',
+                '    QuantumEncryption qencrypt_;',
+                '    ThreatDetector detector_;',
+                '    <span class="keyword">uint64_t</span> threats_blocked_ = <span class="number">0</span>;',
+                '',
+                '<span class="keyword">public</span>:',
+                '    <span class="keyword">void</span> <span class="function">initialize</span>() {',
+                '        qencrypt_.<span class="function">generateKeys</span>(<span class="number">8192</span>);',
+                '        detector_.<span class="function">loadSignatures</span>();',
+                '        <span class="success">std::cout << "✓ Quantum firewall active\\n";</span>',
+                '    }',
+                '',
+                '    <span class="keyword">bool</span> <span class="function">scanPacket</span>(<span class="keyword">const</span> Packet& p) {',
+                '        <span class="keyword">if</span> (detector_.<span class="function">isThreat</span>(p)) {',
+                '            <span class="function">blockThreat</span>(p);',
+                '            threats_blocked_++;',
+                '            <span class="error">return false;</span>',
+                '        }',
+                '        <span class="success">return true;</span>',
+                '    }',
+                '};',
+                '',
+                '} <span class="comment">// namespace stark::security</span>',
+                '<span class="success">✓ Security systems: ARMED</span>',
+            ],
+            terminal4: [
+                '<span class="success">[DIAGNOSTICS] System health: OPTIMAL</span>',
+                '<span class="success">[DIAGNOSTICS] Arc Reactor: 100% efficiency</span>',
+                '<span class="success">[DIAGNOSTICS] CPU temperature: 42°C</span>',
+                '<span class="comment">[INFO] Running full system scan...</span>',
+                '<span class="success">[SCAN] Memory: OK</span>',
+                '<span class="success">[SCAN] Storage: OK</span>',
+                '<span class="success">[SCAN] Network: OK</span>',
+                '<span class="warning">[WARNING] High network traffic detected</span>',
+                '<span class="success">[SECURITY] Threat neutralized</span>',
+                '<span class="comment">[INFO] Uplink to satellite network</span>',
+                '<span class="success">[NETWORK] Connected to 47 satellites</span>',
+                '<span class="success">[AI] Learning rate: optimal</span>',
+            ],
+            terminal5: [
+                '<span class="comment">// WEAPONS SYSTEMS - Repulsor Technology</span>',
+                '<span class="keyword">use</span> stark::weapons::{Repulsor, Unibeam};',
+                '',
+                '<span class="keyword">struct</span> <span class="function">WeaponSystem</span> {',
+                '    repulsors: Vec&lt;Repulsor&gt;,',
+                '    unibeam: Unibeam,',
+                '    charge_level: <span class="keyword">f32</span>,',
+                '}',
+                '',
+                '<span class="keyword">impl</span> WeaponSystem {',
+                '    <span class="keyword">fn</span> <span class="function">calibrate</span>(&<span class="keyword">mut</span> self) {',
+                '        <span class="keyword">for</span> repulsor <span class="keyword">in</span> &<span class="keyword">mut</span> self.repulsors {',
+                '            repulsor.<span class="function">charge</span>(<span class="number">100.0</span>);',
+                '        }',
+                '        <span class="success">println!("✓ Repulsors charged");</span>',
+                '    }',
+                '}',
+                '',
+                '<span class="success">✓ Weapons systems: READY</span>',
+                '<span class="success">✓ Repulsor arrays: 100% charged</span>',
+            ],
+            terminal6: [
+                '<span class="comment">// FLIGHT SYSTEMS - Advanced Stabilization</span>',
+                '<span class="keyword">package</span> flight',
+                '',
+                '<span class="keyword">type</span> <span class="function">FlightController</span> <span class="keyword">struct</span> {',
+                '    thrusters [<span class="number">4</span>]Thruster',
+                '    stabilizers [<span class="number">8</span>]Stabilizer',
+                '    altitude <span class="keyword">float64</span>',
+                '}',
+                '',
+                '<span class="keyword">func</span> (fc *FlightController) <span class="function">Calibrate</span>() {',
+                '    <span class="keyword">for</span> i := <span class="keyword">range</span> fc.thrusters {',
+                '        fc.thrusters[i].<span class="function">Initialize</span>()',
+                '    }',
+                '    <span class="success">fmt.Println("✓ Flight systems calibrated")</span>',
+                '}',
+                '',
+                '<span class="success">✓ Flight stabilizers: CALIBRATED</span>',
+                '<span class="success">✓ Thrusters: ONLINE</span>',
+            ]
+        };
+
+        // ========== TERMINAL SYSTEM ==========
+        let terminals = {
+            terminal1: { element: document.getElementById('terminal1'), index: 0, codes: codeTemplates.terminal1 },
+            terminal2: { element: document.getElementById('terminal2'), index: 0, codes: codeTemplates.terminal2 },
+            terminal3: { element: document.getElementById('terminal3'), index: 0, codes: codeTemplates.terminal3 },
+            terminal4: { element: document.getElementById('terminal4'), index: 0, codes: codeTemplates.terminal4 },
+            terminal5: { element: document.getElementById('terminal5'), index: 0, codes: codeTemplates.terminal5 },
+            terminal6: { element: document.getElementById('terminal6'), index: 0, codes: codeTemplates.terminal6 }
+        };
+
+        let currentTerminal = 'terminal1';
+        let isPaused = false;
+        let speed = 1;
+        let charCount = 0;
+
+        function addCodeLine() {
+            if (isPaused) return;
+
+            const term = terminals[currentTerminal];
+            
+            if (term.index < term.codes.length) {
+                const line = document.createElement('div');
+                line.className = 'code-line';
+                line.innerHTML = term.codes[term.index];
+                term.element.appendChild(line);
+                term.element.scrollTop = term.element.scrollHeight;
+                term.index++;
+
+                if (term.element.children.length > 50) {
+                    term.element.removeChild(term.element.firstChild);
+                }
+            } else {
+                term.index = 0;
+                const terminalKeys = Object.keys(terminals);
+                const currentIndex = terminalKeys.indexOf(currentTerminal);
+                currentTerminal = terminalKeys[(currentIndex + 1) % terminalKeys.length];
+            }
+        }
+
+        setInterval(() => {
+            if (!isPaused) addCodeLine();
+        }, 800 / speed);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            if (e.key.toLowerCase() === 'f') return toggleFullscreen();
+            if (e.key.toLowerCase() === 'v') return toggleVoice();
+            if (e.key.toLowerCase() === 'a') return toggleChat();
+            if (e.key.toLowerCase() === 'c') return clearTerminals();
+            if (e.key === ' ') { e.preventDefault(); return togglePause(); }
+            if (e.key.toLowerCase() === 's') return toggleSpeed();
+            if (e.key.toLowerCase() === 't') return toggleTheme();
+            if (e.key.toLowerCase() === 'r') return runScan();
+
+            charCount++;
+            if (charCount % (4 - speed) === 0) addCodeLine();
+        });
+
+        // ========== STATS UPDATE ==========
+        function updateStats() {
+            const cpu = Math.floor(Math.random() * 30) + 25;
+            const ram = Math.floor(Math.random() * 35) + 35;
+            const network = (Math.random() * 150 + 50).toFixed(1);
+            const reactor = (Math.random() * 0.2 + 3.1).toFixed(1);
+
+            document.getElementById('cpu').textContent = cpu;
+            document.getElementById('ram').textContent = ram;
+            document.getElementById('network').textContent = network;
+            document.getElementById('reactorPower').textContent = reactor;
+
+            document.getElementById('cpuBar').style.width = cpu + '%';
+            document.getElementById('ramBar').style.width = ram + '%';
+            document.getElementById('networkBar').style.width = (network / 200 * 100) + '%';
+        }
+        setInterval(updateStats, 2000);
+
+        // ========== UPTIME ==========
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            const hours = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            document.getElementById('uptime').textContent = 
+                String(hours).padStart(2, '0') + ':' +
+                String(mins).padStart(2, '0') + ':' +
+                String(secs).padStart(2, '0');
+        }, 1000);
+
+        // ========== POWER DISTRIBUTION UPDATE ==========
+        setInterval(() => {
+            ['Repulsor', 'Shield', 'Flight', 'Weapon', 'AI'].forEach(system => {
+                const value = Math.floor(Math.random() * 20 + 75);
+                document.getElementById('power' + system).textContent = value + '%';
+                document.getElementById('bar' + system).style.width = value + '%';
+            });
+        }, 4000);
+
+        // ========== NOTIFICATIONS ==========
+        const notifications = [
+            { type: 'success', title: '✓ SYSTEM OPTIMAL', message: 'All systems operating at peak efficiency' },
+            { type: 'info', title: '📡 SATELLITE LINK', message: 'Connected to global network - 47 satellites' },
+            { type: 'warning', title: '⚠ HIGH TRAFFIC', message: 'Unusual network activity detected' },
+            { type: 'success', title: '🛡️ THREAT BLOCKED', message: 'Security system neutralized intrusion attempt' },
+            { type: 'info', title: '🧠 AI LEARNING', message: 'Neural network processing new data patterns' },
+        ];
+
+        function showNotification(type, title, message) {
+            const area = document.getElementById('notificationArea');
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.innerHTML = `
+                <div class="notification-title">${title}</div>
+                <div>${message}</div>
+                <div class="notification-time">${new Date().toLocaleTimeString()}</div>
+            `;
+            area.appendChild(notif);
+
+            setTimeout(() => notif.remove(), 5000);
+
+            if (area.children.length > 5) {
+                area.removeChild(area.firstChild);
+            }
+        }
+
+        setInterval(() => {
+            if (Math.random() > 0.6) {
+                const notif = notifications[Math.floor(Math.random() * notifications.length)];
+                showNotification(notif.type, notif.title, notif.message);
+            }
+        }, 10000);
+
+        // ========== TOGGLE FUNCTIONS ==========
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                showNotification('success', '🖥️ FULLSCREEN', 'Fullscreen mode activated');
+                document.getElementById('fullscreenBtn').classList.add('active');
+            } else {
+                document.exitFullscreen();
+                showNotification('info', '🖥️ FULLSCREEN', 'Fullscreen mode deactivated');
+                document.getElementById('fullscreenBtn').classList.remove('active');
+            }
+        }
+
+        function toggleVoice() {
+            document.getElementById('voiceVisualizer').classList.toggle('active');
+            document.getElementById('voiceBtn').classList.toggle('active');
+            const isActive = document.getElementById('voiceVisualizer').classList.contains('active');
+            showNotification(isActive ? 'success' : 'info', '🎤 VOICE MODE', 
+                isActive ? 'Voice recognition activated' : 'Voice recognition deactivated');
+        }
+
+        function toggleChat() {
+            document.getElementById('aiChat').classList.toggle('active');
+            document.getElementById('chatBtn').classList.toggle('active');
+        }
+
+        function clearTerminals() {
+            Object.values(terminals).forEach(term => {
+                term.element.innerHTML = '';
+                term.index = 0;
+            });
+            showNotification('success', '🗑️ TERMINALS', 'All terminals cleared');
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pauseBtn');
+            btn.innerHTML = isPaused ? '<span>▶️ RESUME</span>' : '<span>⏸️ PAUSE</span>';
+            btn.classList.toggle('active');
+            showNotification('warning', isPaused ? '⏸️ PAUSED' : '▶️ RESUMED', 
+                'System ' + (isPaused ? 'paused' : 'resumed'));
+        }
+
+        function toggleSpeed() {
+            speed = speed >= 3 ? 1 : speed + 1;
+            document.getElementById('speedBtn').innerHTML = `<span>⚡ SPEED: ${speed}x</span>`;
+            showNotification('info', '⚡ SPEED', `Processing speed: ${speed}x`);
+        }
+
+        let themes = ['cyan', 'red', 'green', 'purple'];
+        let currentTheme = 0;
+
+        function toggleTheme() {
+            currentTheme = (currentTheme + 1) % themes.length;
+            const theme = themes[currentTheme];
+            const colors = {
+                cyan: '#00d9ff',
+                red: '#ff3b3b',
+                green: '#00ff00',
+                purple: '#a78bfa'
+            };
+            document.documentElement.style.setProperty('--primary', colors[theme]);
+            showNotification('success', '🎨 THEME', `Theme changed to ${theme.toUpperCase()}`);
+        }
+
+        function runScan() {
+            showNotification('info', '🔍 SCANNING', 'Running full system diagnostic...');
+            const btn = document.getElementById('scanBtn');
+            btn.classList.add('active');
+            
+            setTimeout(() => {
+                showNotification('success', '✓ SCAN COMPLETE', 'All systems nominal - No threats detected');
+                btn.classList.remove('active');
+            }, 3000);
+        }
+
+        function toggleHologram() {
+            document.getElementById('hologramDisplay').classList.toggle('active');
+        }
+
+        function toggleBiometric() {
+            document.getElementById('biometricScanner').classList.toggle('active');
+        }
+
+        function toggleSpectrum() {
+            document.getElementById('spectrumAnalyzer').classList.toggle('active');
+        }
+
+        function toggleFaceRec() {
+            document.getElementById('faceRecognition').classList.toggle('active');
+        }
+
+        function toggleCommandBuilder() {
+            document.getElementById('commandBuilder').classList.toggle('active');
+        }
+
+        function addCommand(cmd) {
+            document.getElementById('commandInput').value = cmd;
+        }
+
+        function executeCommand() {
+            const cmd = document.getElementById('commandInput').value;
+            if (cmd) {
+                showAchievement('COMMAND EXECUTED', cmd);
+                toggleCommandBuilder();
+            }
+        }
+
+        // ========== ACHIEVEMENT SYSTEM ==========
+        function showAchievement(title, desc) {
+            const achievement = document.getElementById('achievement');
+            document.getElementById('achievementDesc').textContent = desc;
+            achievement.classList.add('show');
+            
+            setTimeout(() => {
+                achievement.classList.remove('show');
+            }, 4000);
+        }
+
+        // ========== KONAMI CODE ==========
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    document.getElementById('easterEgg').classList.add('active');
+                    showAchievement('EASTER EGG!', 'Konami Code Activated');
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        function closeEasterEgg() {
+            document.getElementById('easterEgg').classList.remove('active');
+        }
+
+        // ========== AI CHAT ==========
+        const aiResponses = [
+            "At your service, sir.",
+            "Processing your request...",
+            "All systems are functioning optimally.",
+            "I'm detecting no immediate threats.",
+            "Shall I run a diagnostic?",
+            "The Arc Reactor is operating at peak efficiency.",
+            "Would you like me to activate the suit?",
+            "All weapons systems are online and ready.",
+            "Flight systems calibrated and ready for deployment.",
+            "I've updated the threat database with the latest signatures."
+        ];
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            const chatBody = document.getElementById('chatBody');
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user';
+            userMsg.textContent = message;
+            chatBody.appendChild(userMsg);
+
+            input.value = '';
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chat-message ai';
+                aiMsg.textContent = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+                chatBody.appendChild(aiMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 1000);
+
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function handleChatEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        // ========== AUDIO PLAYBACK ==========
+        // Play startup audio
+        window.addEventListener('load', function() {
+            const audio = document.getElementById('startupAudio');
+            if (audio) {
+                audio.play().catch(function(error) {
+                    console.log('Audio autoplay prevented:', error);
+                });
+            }
+        });
+
+        // Fallback: Play on first user interaction if autoplay failed
+        document.addEventListener('click', function playAudioOnClick() {
+            const audio = document.getElementById('startupAudio');
+            if (audio && audio.paused) {
+                audio.play().catch(function(error) {
+                    console.log('Audio playback error:', error);
+                });
+                document.removeEventListener('click', playAudioOnClick);
+            }
+        });
+
+        // ========== BOOT SEQUENCE ==========
+        setTimeout(() => {
+            document.getElementById('bootSequence').style.display = 'none';
+            showNotification('success', '⚡ SYSTEM READY', 'Welcome, Mr. Stark. All systems operational.');
+            
+            setTimeout(() => {
+                showNotification('info', '💡 TIP', 'Use hexagon menu or press keyboard shortcuts');
+            }, 2000);
+            
+            setTimeout(() => {
+                showAchievement('WELCOME BACK', 'JARVIS v3.0 - All systems online');
+            }, 3000);
+        }, 4500);
+
+        // Achievement triggers
+        let commandCount = 0;
+        document.addEventListener('keydown', () => {
+            commandCount++;
+            if (commandCount === 100) showAchievement('SPEED DEMON', 'Typed 100 commands!');
+            if (commandCount === 500) showAchievement('MASTER HACKER', 'Typed 500 commands!');
+        });
+
+        console.log('%c🦾 JARVIS ULTIMATE SYSTEM ACTIVATED', 'color: #00d9ff; font-size: 20px; font-weight: bold;');
+        console.log('%cTry the Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color: #ffd700; font-size: 14px;');
+    </script>
+</body>
+</html>

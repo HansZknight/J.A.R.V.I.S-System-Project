@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARK INDUSTRIES - Ultimate Lab System V3.0</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Particle Background -->
+    <canvas id="particleCanvas"></canvas>
+    
+    <!-- Audio Element for Sound Effects -->
+    <audio id="soundEffect" preload="auto"></audio>
+    
+    <!-- Main Container -->
+    <div class="main-container">
+        
+        <!-- Enhanced Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="arc-reactor">
+                    <div class="reactor-core"></div>
+                    <div class="reactor-ring"></div>
+                    <div class="reactor-ring"></div>
+                    <div class="reactor-ring"></div>
+                </div>
+                <div class="logo-text">
+                    <h1>STARK INDUSTRIES</h1>
+                    <span class="version">LAB SYSTEM V3.0</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="weather-widget" id="weatherWidget">
+                    <i class="fas fa-cloud-sun"></i>
+                    <span id="weatherTemp">--°C</span>
+                    <span id="weatherDesc">Loading...</span>
+                </div>
+                <div class="location-widget" id="locationWidget">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="locationText">Detecting...</span>
+                </div>
+                  <li><a href="Jarvis.html">J.A.R.V.I.S</a></li>
+            </div>
+            
+            <div class="header-right">
+                <div class="system-time">
+                    <span id="currentTime">00:00:00</span>
+                    <span id="currentDate">Loading...</span>
+                </div>
+                <div class="battery-status" id="batteryStatus">
+                    <i class="fas fa-battery-full"></i>
+                    <span id="batteryLevel">100%</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <canvas id="faceCanvas"></canvas>
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">TONY STARK</span>
+                        <span class="status-indicator"></span>
+                    </div>
+                </div>
+                <button class="btn-fullscreen" id="fullscreenBtn">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Voice Command Display -->
+        <div class="voice-command" id="voiceCommand">
+            <div class="voice-wave">
+                <span></span><span></span><span></span>
+            </div>
+            <span id="voiceText">JARVIS READY</span>
+            <button class="voice-btn" id="voiceBtn">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <button class="control-btn" id="screenCapture" title="Screenshot">
+                <i class="fas fa-camera"></i>
+            </button>
+            <button class="control-btn" id="soundToggle" title="Sound">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="control-btn" id="themeToggle" title="Theme">
+                <i class="fas fa-palette"></i>
+            </button>
+            <button class="control-btn" id="settingsBtn" title="Settings">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+
+        <!-- Main Grid Layout -->
+        <div class="grid-container">
+            
+            <!-- Left Panel -->
+            <div class="left-panel">
+                
+                <!-- AI Assistant -->
+                <div class="panel ai-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-robot"></i> J.A.R.V.I.S</h3>
+                        <div class="panel-controls">
+                            <span class="panel-status online">ONLINE</span>
+                            <button class="btn-minimize"><i class="fas fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="ai-avatar">
+                            <canvas id="aiWaveform"></canvas>
+                            <div class="ai-status" id="aiStatus">LISTENING</div>
+                        </div>
+                        <div class="ai-chat" id="aiChat">
+                            <div class="chat-message ai">
+                                <div class="message-avatar">J</div>
+                                <div class="message-content">
+                                    <span class="message-time">Just now</span>
+                                    <p>Good evening, sir. All systems operational. How may I assist you today?</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-suggestions">
+                            <button class="suggestion-btn">System Status</button>
+                            <button class="suggestion-btn">Deploy Suit</button>
+                            <button class="suggestion-btn">Run Diagnostics</button>
+                        </div>
+                        <div class="ai-input">
+                            <input type="text" id="aiInput" placeholder="Type or speak to JARVIS...">
+                            <button id="aiSend"><i class="fas fa-paper-plane"></i></button>
+                            <button id="aiVoiceInput"><i class="fas fa-microphone"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced System Monitor -->
+                <div class="panel system-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-microchip"></i> SYSTEM MONITOR</h3>
+                        <div class="panel-controls">
+                            <button class="btn-refresh" id="refreshSystem">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="stat-item">
+                            <div class="stat-header">
+                                <label>CPU Usage</label>
+                                <span class="stat-value" id="cpuValue">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill cpu-progress" data-value="0"></div>
+                            </div>
+                            <div class="stat-details">
+                                <span>Cores: <strong id="cpuCores">8</strong></span>
+                                <span>Threads: <strong id="cpuThreads">16</strong></span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-header">
+                                <label>Memory</label>
+                                <span class="stat-value" id="memoryValue">0 GB</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill memory-progress" data-value="0"></div>
+                            </div>
+                            <div class="stat-details">
+                                <span>Total: <strong id="memoryTotal">16 GB</strong></span>
+                                <span>Available: <strong id="memoryFree">8 GB</strong></span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-header">
+                                <label>GPU Load</label>
+                                <span class="stat-value" id="gpuValue">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill gpu-progress" data-value="0"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-header">
+                                <label>Network</label>
+                                <span class="stat-value" id="networkValue">0 Mbps</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill network-progress" data-value="0"></div>
+                            </div>
+                            <div class="stat-details">
+                                <span>↓ <strong id="downloadSpeed">0</strong> Mbps</span>
+                                <span>↑ <strong id="uploadSpeed">0</strong> Mbps</span>
+                            </div>
+                        </div>
+
+                        <div class="system-info">
+                            <div class="info-item">
+                                <i class="fas fa-desktop"></i>
+                                <span id="browserInfo">Browser</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-wifi"></i>
+                                <span id="connectionType">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arc Reactor Control -->
+                <div class="panel reactor-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-atom"></i> ARC REACTOR</h3>
+                        <span class="panel-status active">ACTIVE</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="reactor-display">
+                            <canvas id="reactorCanvas"></canvas>
+                            <div class="reactor-stats">
+                                <div class="reactor-stat">
+                                    <span class="stat-label">POWER OUTPUT</span>
+                                    <div class="stat-data">
+                                        <span class="stat-value" id="reactorPower">3.2</span>
+                                        <span class="stat-unit">GW</span>
+                                    </div>
+                                </div>
+                                <div class="reactor-stat">
+                                    <span class="stat-label">TEMPERATURE</span>
+                                    <div class="stat-data">
+                                        <span class="stat-value" id="reactorTemp">4500</span>
+                                        <span class="stat-unit">°K</span>
+                                    </div>
+                                </div>
+                                <div class="reactor-stat">
+                                    <span class="stat-label">EFFICIENCY</span>
+                                    <div class="stat-data">
+                                        <span class="stat-value" id="reactorEfficiency">99.8</span>
+                                        <span class="stat-unit">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="energy-distribution">
+                            <h4>Energy Distribution</h4>
+                            <div class="distribution-item">
+                                <label>Armor Systems</label>
+                                <input type="range" min="0" max="100" value="35" class="energy-slider" id="armorEnergy">
+                                <span class="energy-percent">35%</span>
+                            </div>
+                            <div class="distribution-item">
+                                <label>Weapons</label>
+                                <input type="range" min="0" max="100" value="25" class="energy-slider" id="weaponsEnergy">
+                                <span class="energy-percent">25%</span>
+                            </div>
+                            <div class="distribution-item">
+                                <label>Shields</label>
+                                <input type="range" min="0" max="100" value="20" class="energy-slider" id="shieldsEnergy">
+                                <span class="energy-percent">20%</span>
+                            </div>
+                            <div class="distribution-item">
+                                <label>Thrusters</label>
+                                <input type="range" min="0" max="100" value="20" class="energy-slider" id="thrustersEnergy">
+                                <span class="energy-percent">20%</span>
+                            </div>
+                        </div>
+                        <div class="reactor-controls">
+                            <button class="reactor-btn boost" id="reactorBoost">
+                                <i class="fas fa-bolt"></i> BOOST
+                            </button>
+                            <button class="reactor-btn stabilize" id="reactorStabilize">
+                                <i class="fas fa-sync-alt"></i> STABILIZE
+                            </button>
+                            <button class="reactor-btn emergency" id="reactorEmergency">
+                                <i class="fas fa-exclamation-triangle"></i> EMERGENCY
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Center Panel -->
+            <div class="center-panel">
+                
+                <!-- Holographic Display -->
+                <div class="panel holo-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-cube"></i> HOLOGRAPHIC INTERFACE</h3>
+                        <div class="panel-tabs">
+                            <button class="tab-btn active" data-tab="3d">
+                                <i class="fas fa-cube"></i> 3D MODEL
+                            </button>
+                            <button class="tab-btn" data-tab="map">
+                                <i class="fas fa-map"></i> MAP
+                            </button>
+                            <button class="tab-btn" data-tab="scan">
+                                <i class="fas fa-radar"></i> SCAN
+                            </button>
+                            <button class="tab-btn" data-tab="satellite">
+                                <i class="fas fa-satellite"></i> SATELLITE
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="holo-display" id="holoDisplay">
+                            <canvas id="holoCanvas"></canvas>
+                            <div class="holo-grid"></div>
+                            <div class="scan-line"></div>
+                            <div class="holo-info" id="holoInfo">
+                                <div class="info-row">
+                                    <span>MODEL:</span>
+                                    <span id="modelName">MARK L</span>
+                                </div>
+                                <div class="info-row">
+                                    <span>ROTATION:</span>
+                                    <span id="rotationAngle">0°</span>
+                                </div>
+                                <div class="info-row">
+                                    <span>ZOOM:</span>
+                                    <span id="zoomLevel">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="holo-controls">
+                            <button class="holo-btn" id="rotateLeft" title="Rotate Left">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                            <button class="holo-btn" id="zoomOut" title="Zoom Out">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="holo-btn" id="resetView" title="Reset View">
+                                <i class="fas fa-compress"></i>
+                            </button>
+                            <button class="holo-btn" id="zoomIn" title="Zoom In">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="holo-btn" id="rotateRight" title="Rotate Right">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button class="holo-btn" id="autoRotate" title="Auto Rotate">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Analysis -->
+                <div class="panel data-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-chart-line"></i> DATA ANALYSIS</h3>
+                        <select id="dataSelect">
+                            <option value="performance">Performance Metrics</option>
+                            <option value="energy">Energy Consumption</option>
+                            <option value="neural">Neural Network</option>
+                            <option value="network">Network Traffic</option>
+                        </select>
+                    </div>
+                    <div class="panel-body">
+                        <div class="chart-container">
+                            <canvas id="chartCanvas"></canvas>
+                        </div>
+                        <div class="data-stats">
+                            <div class="data-stat">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <div class="stat-content">
+                                    <span class="stat-label">Efficiency</span>
+                                    <span class="stat-value" id="efficiencyValue">98.7%</span>
+                                </div>
+                            </div>
+                            <div class="data-stat">
+                                <i class="fas fa-clock"></i>
+                                <div class="stat-content">
+                                    <span class="stat-label">Uptime</span>
+                                    <span class="stat-value" id="uptimeValue">99.9%</span>
+                                </div>
+                            </div>
+                            <div class="data-stat">
+                                <i class="fas fa-server"></i>
+                                <div class="stat-content">
+                                    <span class="stat-label">Processes</span>
+                                    <span class="stat-value" id="processesValue">1,247</span>
+                                </div>
+                            </div>
+                            <div class="data-stat">
+                                <i class="fas fa-database"></i>
+                                <div class="stat-content">
+                                    <span class="stat-label">Data Rate</span>
+                                    <span class="stat-value" id="dataRateValue">2.4 GB/s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mission Control -->
+                <div class="panel mission-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-rocket"></i> MISSION CONTROL</h3>
+                        <span class="mission-status">STANDBY</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="mission-map" id="missionMap">
+                            <canvas id="mapCanvas"></canvas>
+                            <div class="map-markers" id="mapMarkers"></div>
+                        </div>
+                        <div class="mission-objectives">
+                            <h4>Active Objectives</h4>
+                            <div class="objective-item complete">
+                                <i class="fas fa-check-circle"></i>
+                                <span>System Initialization</span>
+                            </div>
+                            <div class="objective-item active">
+                                <i class="fas fa-circle-notch fa-spin"></i>
+                                <span>Perimeter Scan</span>
+                            </div>
+                            <div class="objective-item pending">
+                                <i class="fas fa-circle"></i>
+                                <span>Threat Assessment</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                
+                <!-- Enhanced Suit Status -->
+                <div class="panel suit-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-user-astronaut"></i> MARK L ARMOR</h3>
+                        <span class="panel-status standby">STANDBY</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="suit-diagram">
+                            <div class="suit-svg">
+                                <!-- Animated SVG Suit -->
+                                <svg viewBox="0 0 200 400" id="suitSvg">
+                                    <!-- Helmet -->
+                                    <ellipse cx="100" cy="60" rx="45" ry="55" class="suit-part" data-part="helmet"/>
+                                    <!-- Chest -->
+                                    <rect x="55" y="110" width="90" height="100" rx="10" class="suit-part" data-part="chest"/>
+                                    <!-- Arc Reactor -->
+                                    <circle cx="100" cy="150" r="15" class="arc-glow"/>
+                                    <!-- Left Arm -->
+                                    <rect x="25" y="120" width="25" height="90" rx="8" class="suit-part" data-part="left-arm"/>
+                                    <!-- Right Arm -->
+                                    <rect x="150" y="120" width="25" height="90" rx="8" class="suit-part" data-part="right-arm"/>
+                                    <!-- Left Leg -->
+                                    <rect x="65" y="215" width="30" height="130" rx="8" class="suit-part" data-part="left-leg"/>
+                                    <!-- Right Leg -->
+                                    <rect x="105" y="215" width="30" height="130" rx="8" class="suit-part" data-part="right-leg"/>
+                                    <!-- Repulsors -->
+                                    <circle cx="37.5" cy="205" r="5" class="repulsor"/>
+                                    <circle cx="162.5" cy="205" r="5" class="repulsor"/>
+                                    <circle cx="80" cy="340" r="5" class="repulsor"/>
+                                    <circle cx="120" cy="340" r="5" class="repulsor"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="suit-stats-grid">
+                            <div class="suit-stat">
+                                <label>Power</label>
+                                <div class="circular-progress" style="--value: 360deg" data-percent="100">
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            <div class="suit-stat">
+                                <label>Shields</label>
+                                <div class="circular-progress" style="--value: 360deg" data-percent="100">
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            <div class="suit-stat">
+                                <label>Weapons</label>
+                                <div class="circular-progress" style="--value: 360deg" data-percent="100">
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            <div class="suit-stat">
+                                <label>Thrusters</label>
+                                <div class="circular-progress" style="--value: 360deg" data-percent="100">
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="suit-actions">
+                            <button class="suit-action-btn deploy" id="deploySuit">
+                                <i class="fas fa-rocket"></i>
+                                <span>DEPLOY SUIT</span>
+                            </button>
+                            <button class="suit-action-btn diagnostics" id="runDiagnostics">
+                                <i class="fas fa-stethoscope"></i>
+                                <span>DIAGNOSTICS</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weapons System -->
+                <div class="panel weapons-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-crosshairs"></i> WEAPONS SYSTEM</h3>
+                        <span class="panel-status armed">ARMED</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="weapon-item">
+                            <div class="weapon-header">
+                                <i class="fas fa-hand-rock"></i>
+                                <span>Repulsor Beams</span>
+                                <span class="weapon-status ready">READY</span>
+                            </div>
+                            <div class="weapon-bar">
+                                <div class="weapon-charge" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="weapon-item">
+                            <div class="weapon-header">
+                                <i class="fas fa-bahai"></i>
+                                <span>Unibeam</span>
+                                <span class="weapon-status ready">READY</span>
+                            </div>
+                            <div class="weapon-bar">
+                                <div class="weapon-charge" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="weapon-item">
+                            <div class="weapon-header">
+                                <i class="fas fa-rocket"></i>
+                                <span>Micro Missiles</span>
+                                <span class="weapon-status ready">24/24</span>
+                            </div>
+                            <div class="weapon-bar">
+                                <div class="weapon-charge" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="weapon-item">
+                            <div class="weapon-header">
+                                <i class="fas fa-bullseye"></i>
+                                <span>Targeting System</span>
+                                <span class="weapon-status active">ACTIVE</span>
+                            </div>
+                            <div class="weapon-bar">
+                                <div class="weapon-charge" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security System -->
+                <div class="panel security-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-shield-alt"></i> SECURITY</h3>
+                        <span class="panel-status secure">SECURE</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="security-grid">
+                            <div class="security-item active">
+                                <i class="fas fa-shield-virus"></i>
+                                <span class="security-label">Firewall</span>
+                                <span class="security-status">ACTIVE</span>
+                            </div>
+                            <div class="security-item active">
+                                <i class="fas fa-key"></i>
+                                <span class="security-label">Encryption</span>
+                                <span class="security-status">AES-256</span>
+                            </div>
+                            <div class="security-item active">
+                                <i class="fas fa-video"></i>
+                                <span class="security-label">Surveillance</span>
+                                <span class="security-status">24 CAMS</span>
+                            </div>
+                            <div class="security-item secure">
+                                <i class="fas fa-user-shield"></i>
+                                <span class="security-label">Intrusion</span>
+                                <span class="security-status">CLEAR</span>
+                            </div>
+                        </div>
+                        <div class="threat-analysis">
+                            <h4>Threat Analysis</h4>
+                            <div class="threat-level">
+                                <div class="threat-meter">
+                                    <div class="threat-fill" style="width: 5%"></div>
+                                </div>
+                                <div class="threat-labels">
+                                    <span class="threat-text low">LOW</span>
+                                    <span class="threat-text medium">MEDIUM</span>
+                                    <span class="threat-text high">HIGH</span>
+                                </div>
+                            </div>
+                            <div class="threat-stats">
+                                <div class="threat-stat">
+                                    <span class="threat-count">0</span>
+                                    <span class="threat-label">Active Threats</span>
+                                </div>
+                                <div class="threat-stat">
+                                    <span class="threat-count">247</span>
+                                    <span class="threat-label">Blocked Today</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="panel notif-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-bell"></i> NOTIFICATIONS</h3>
+                        <div class="panel-controls">
+                            <span class="notif-badge">3</span>
+                            <button class="btn-clear" id="clearNotifs">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-item priority-high">
+                                <div class="notif-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <span class="notif-time">2m ago</span>
+                                    <p class="notif-title">Security Alert</p>
+                                    <p class="notif-desc">Unauthorized access attempt blocked</p>
+                                </div>
+                            </div>
+                            <div class="notif-item priority-medium">
+                                <div class="notif-icon">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <span class="notif-time">15m ago</span>
+                                    <p class="notif-title">System Update</p>
+                                    <p class="notif-desc">New firmware available for Mark L</p>
+                                </div>
+                            </div>
+                            <div class="notif-item priority-low">
+                                <div class="notif-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <span class="notif-time">1h ago</span>
+                                    <p class="notif-title">Backup Complete</p>
+                                    <p class="notif-desc">System backup completed successfully</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="panel actions-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-bolt"></i> QUICK ACTIONS</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="action-grid">
+                            <button class="action-btn" id="deployDrones" data-action="drones">
+                                <i class="fas fa-helicopter"></i>
+                                <span>Deploy Drones</span>
+                                <div class="action-status">READY</div>
+                            </button>
+                            <button class="action-btn" id="scanArea" data-action="scan">
+                                <i class="fas fa-radar"></i>
+                                <span>Area Scan</span>
+                                <div class="action-status">READY</div>
+                            </button>
+                            <button class="action-btn" id="activateShields" data-action="shields">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Shields</span>
+                                <div class="action-status">STANDBY</div>
+                            </button>
+                            <button class="action-btn" id="emergencyProtocol" data-action="emergency">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Emergency</span>
+                                <div class="action-status">READY</div>
+                            </button>
+                            <button class="action-btn" id="launchMission" data-action="mission">
+                                <i class="fas fa-rocket"></i>
+                                <span>Launch Mission</span>
+                                <div class="action-status">READY</div>
+                            </button>
+                            <button class="action-btn" id="houseParty" data-action="party">
+                                <i class="fas fa-bomb"></i>
+                                <span>House Party</span>
+                                <div class="action-status">READY</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modal: Settings -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> SYSTEM SETTINGS</h2>
+                <button class="modal-close" id="closeSettings">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>Display</h3>
+                    <div class="setting-item">
+                        <label>Theme Color</label>
+                        <input type="color" id="themeColor" value="#00ffff">
+                    </div>
+                    <div class="setting-item">
+                        <label>Animation Speed</label>
+                        <input type="range" min="0.5" max="2" step="0.1" value="1" id="animSpeed">
+                    </div>
+                    <div class="setting-item">
+                        <label>Enable Particles</label>
+                        <input type="checkbox" id="enableParticles" checked>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Audio</h3>
+                    <div class="setting-item">
+                        <label>Sound Effects</label>
+                        <input type="checkbox" id="enableSound" checked>
+                    </div>
+                    <div class="setting-item">
+                        <label>Volume</label>
+                        <input type="range" min="0" max="100" value="50" id="volumeControl">
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Performance</h3>
+                    <div class="setting-item">
+                        <label>High Performance Mode</label>
+                        <input type="checkbox" id="highPerformance">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-reactor">
+                <div class="loading-core"></div>
+                <div class="loading-rings">
+                    <div class="loading-ring"></div>
+                    <div class="loading-ring"></div>
+                    <div class="loading-ring"></div>
+                </div>
+            </div>
+            <h2>STARK INDUSTRIES</h2>
+            <p class="loading-subtitle">ULTIMATE LAB SYSTEM V3.0</p>
+            <div class="loading-steps" id="loadingSteps">
+                <div class="loading-step">Initializing Core Systems...</div>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <span class="loading-text" id="loadingText">0%</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
